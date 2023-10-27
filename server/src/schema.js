@@ -1,3 +1,5 @@
+import { find, remove } from "lodash";
+
 const people = [
   {
     id: "1",
@@ -107,9 +109,14 @@ const typeDefs = `
     personId: String
   }
 
+  type PersonWithCar {
+    person: Person
+    cars: [Car]
+  }
+
   type Query {
     people: [Person]
-    person(id: String!): Person
+    personWithCar(id: String!): PersonWithCar
     carsOfPersonId(id: String!): [Car]
   }
 
@@ -126,11 +133,13 @@ const typeDefs = `
 const resolvers = {
   Query: {
     people: () => people,
-    person: (root, args) => {
-      return find(people, { id: args.id });
+    personWithCar: (root, args) => {
+      return {
+        person: find(people, { id: args.id }),
+        cars: cars.filter((car) => car.personId === args.id),
+      };
     },
     carsOfPersonId: (root, args) => {
-      const person = find(people, { id: args.id });
       const personCars = cars.filter((car) => car.personId === args.id);
       return personCars;
     },
